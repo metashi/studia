@@ -231,6 +231,69 @@ void MergeSort(node* &H)
 		merge(H, H1, H2);
 	}
 }
+// sortowanie kopcowe
+void heapify(int *T, int heapsize, int i)
+{
+	int L = 2 * i;
+	int P = L + 1;
+	int largest = i;
+	if (L <= heapsize && T[L] > T[i])
+		largest = L;
+	if (P <= heapsize && T[P] > T[largest])
+		largest = P;
+	if (largest != i)
+	{
+		swap(T[i], T[largest]);
+		heapify(T, heapsize, largest);
+	}
+}
+void BuildHeap(int *T, int heapsize)
+{
+	for (int i = heapsize / 2; i > 0; i--)
+	{
+		heapify(T, heapsize, i);
+	}
+}
+
+void HeapSort(int *T, int size)
+{
+	int heapsize = size-1;
+	BuildHeap(T, heapsize);
+	while (heapsize > 1)
+	{
+		swap(T[1], T[heapsize]);
+		heapsize--;
+		heapify(T, heapsize, 1);
+	}
+}
+//to trzeba zrobic
+void bubbleSort(struct node *H)
+{
+	int swapp, i;
+	struct node *ptr1;
+	struct node *lptr = NULL;
+
+	
+	if (H == NULL)
+		return;
+
+	do
+	{
+		swapp = 0;
+		ptr1 = H;
+
+		while (ptr1->next != lptr)
+		{
+			if (ptr1->val > ptr1->next->val)
+			{
+				swap(ptr1, ptr1->next);
+				swapp = 1;
+			}
+			ptr1 = ptr1->next;
+		}
+		lptr = ptr1;
+	} while (swapp);
+}
 
 int main()
 {
@@ -268,7 +331,15 @@ int main()
 	show(H2);
 	show(H3);*/
 	/*merge(H, H2, H3);*/
-	MergeSort(H);
+	//MergeSort(H);
+	int* tablica = new int[10]{0, 20, -10, 6, -6, 3, 15, 8, 8, 30 };
+	HeapSort(tablica, 10);
+	for (int i = 0; i < 10; i++)
+	{
+		cout << tablica[i] << " ";
+	}
+	
+	bubbleSort(&H, 10);
 	show(H);
 	//show(H2);
 	//show(H3);
