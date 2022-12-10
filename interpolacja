@@ -1,0 +1,61 @@
+#include <iostream>
+#include <cmath>
+#include <iomanip>
+
+using namespace std;
+double e = 0.01;
+
+
+void zadanie_1(int ile_wezlow)
+{
+        
+        
+        double x[4], y[4];
+        
+        for (int i = 0; i < ile_wezlow; i++)
+        {
+            cout << "Podaj " << i + 1 << ". argument: "; cin >> x[i];
+            cout << "I wartosc funkcji dla " << i + 1 << ". argumentu: "; cin >> y[i];
+        }
+
+        cout << "\nStablicowana funkcja:" << endl;
+        for (int i = 0; i < ile_wezlow; i++) cout << x[i] << " " << y[i] << endl; //sprawdzian poprawnosci danych
+        cout << "\n";
+
+        double arg;
+        double wart = 0;
+        cout << "Podaj argument, dla ktorego chcesz znalezc wartosc wielomianu interpolujacego: "; cin >> arg;
+
+        for (int i = 0; i < ile_wezlow; i++)
+        {
+            double s = 1;
+            double t = 1;
+
+            for (int j = 0; j < ile_wezlow; j++)
+            {
+                if (j != i)
+                {
+                    s = s * (arg - x[j]); // f(b) - f(a) = f'(c) * (b-a)
+                    t = t * (x[i] - x[j]);
+                }
+            }
+            wart = wart + ((s / t) * y[i]);
+        }
+
+        cout << "Wartosc wielomianu w punkcie " << arg << " jest " << wart;
+
+        
+    }
+
+   
+
+
+int main()
+{
+    int ile_wezlow;
+    cout << "Podaj ilosc wezlow: ";
+    cin >> ile_wezlow;
+    zadanie_1(ile_wezlow);
+    
+    return 0;
+}
