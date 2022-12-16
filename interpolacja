@@ -1,84 +1,206 @@
 #include <iostream>
 #include <cmath>
 #include <iomanip>
+#include <fstream>
+#include <stdio.h>
 
 using namespace std;
 double e = 0.01;
 
-
-void zadanie_1(int ile_wezlow)
+double bk(double x[], double y[], int k)
 {
+    double suma = 0;
+    
+    for (int i = 0; i <= k; i++)
+    {
+        double dzielnik = 1;
         
-        
-        double x[4], y[4];
-        
-        for (int i = 0; i < ile_wezlow; i++)
+
+        for (int j = 0;  j <= k;  j++)
         {
-            cout << "Podaj " << i + 1 << ". argument: "; cin >> x[i];
-            cout << "I wartosc funkcji dla " << i + 1 << ". argumentu: "; cin >> y[i];
-        }
-
-        cout << "\nStablicowana funkcja:" << endl;
-        for (int i = 0; i < ile_wezlow; i++) cout << x[i] << " " << y[i] << endl; //sprawdzian poprawnosci danych
-        cout << "\n";
-
-        double arg;
-        double wart = 0;
-        cout << "Podaj argument, dla ktorego chcesz znalezc wartosc wielomianu interpolujacego: "; cin >> arg;
-
-        for (int i = 0; i < ile_wezlow; i++)
-        {
-            double s = 1;
-            double t = 1;
-
-            for (int j = 0; j < ile_wezlow; j++)
+            if (i != j)
             {
-                if (j != i)
-                {
-                    s = s * (arg - x[j]); // f(b) - f(a) = f'(c) * (b-a)
-                    t = t * (x[i] - x[j]);
-                }
+                dzielnik *= x[i] - x[j];
             }
-            wart = wart + ((s / t) * y[i]);
-            
-            
-        }
-        cout << "Liczba wezlow: " << ile_wezlow;
 
-        cout << "Wartosc wielomianu w punkcie " << arg << " jest " << wart << endl;
-
-        
-        for (int i = 0; i < ile_wezlow; i++)
-        {
-            double s = 1;
-            double t = 1;
-            wart = 0;
-            for (int j = 0; j < ile_wezlow; j++)
-            {
-                if (j != i)
-                {
-                    s = s * (x[i]- x[j]); // f(b) - f(a) = f'(c) * (b-a)
-                    t = t * (x[i] - x[j]);
-                }
-                cout << "Wartosc w funckji w wezlach: " << t << endl;
-            }
-            wart = wart + ((s / t) * y[i]);
-            
-            cout << "Wartosc wielomianu w punkcie " << x[i] << " jest " << wart << endl;
         }
 
-        
+        suma += y[i] / dzielnik;
     }
 
-   
+    cout << "bk: " << suma << endl;
+    cout << "k: " << k << endl;
+    return suma;
+}
+
+double pk(double x[], double y[], int k, double par)
+{
+
+    double iloczyn = 1;
+    for (int i = 0; i <= k-1; i++)
+    {
+        iloczyn *= par - x[i];
+    }
+
+    return iloczyn;
+}
+//Lagrange
+void zadanie_1(int ile_wezlow)
+{
+    double x[100], y[100];
+    ifstream plik;
+    plik.open("Tekst.txt");
+    
+    if (plik.is_open()) {
+
+        plik >> ile_wezlow;
+
+        for (int i = 0; i < ile_wezlow; i++)
+        {
+            plik >> x[i];
+            
+        }
+        for (int i = 0; i < ile_wezlow; i++)
+        {
+            plik >> y[i];
+
+        }
+
+    }
+       
+
+  /*  for (int i = 0; i < ile_wezlow; i++)
+    {
+        cout << "Podaj " << i + 1 << ". argument: "; cin >> x[i];
+        cout << "I wartosc funkcji dla " << i + 1 << ". argumentu: "; cin >> y[i];
+    }*/
+
+    cout << "\nStablicowana funkcja:" << endl;
+    for (int i = 0; i < ile_wezlow; i++) cout << x[i] << " " << y[i] << endl; //sprawdzian poprawnosci danych
+    cout << "\n";
+
+    double arg;
+    double wart = 0;
+    cout << "Podaj argument, dla ktorego chcesz znalezc wartosc wielomianu interpolujacego: "; cin >> arg;
+
+    for (int i = 0; i < ile_wezlow; i++)
+    {
+        double s = 1;
+        double t = 1;
+
+        for (int j = 0; j < ile_wezlow; j++)
+        {
+            if (j != i)
+            {
+                s = s * (arg - x[j]); 
+                t = t * (x[i] - x[j]);
+            }
+        }
+        wart = wart + ((s / t) * y[i]);
+
+
+    }
+    cout << "Liczba wezlow: " << ile_wezlow << endl;
+
+    cout << "Wartosc wielomianu w punkcie " << arg << " jest " << wart << endl;
+
+
+    for (int i = 0; i < ile_wezlow; i++)
+    {
+        double s = 1;
+        double t = 1;
+        wart = 0;
+        for (int j = 0; j < ile_wezlow; j++)
+        {
+            if (j != i)
+            {
+                s = s * (x[i] - x[j]); 
+                t = t * (x[i] - x[j]);
+            }
+            cout << "Wartosc w funkcji w wezlach: " << t << endl;
+        }
+        wart = wart + ((s / t) * y[i]);
+
+        cout << "Wartosc wielomianu w punkcie " << x[i] << " jest " << wart << endl;
+    }
+
+    plik.close();
+
+}
+//Newton
+void zadanie_2(int ile_wezlow)
+{
+    double x[100], y[100];
+    
+    ifstream plik;
+    plik.open("Tekst1.txt");
+
+    if (plik.is_open()) {
+
+        plik >> ile_wezlow;
+
+        for (int i = 0; i < ile_wezlow; i++)
+        {
+            plik >> x[i];
+
+        }
+        for (int i = 0; i < ile_wezlow; i++)
+        {
+            plik >> y[i];
+
+        }
+
+    }
+   /* for (int i = 0; i < ile_wezlow; i++)
+    {
+        cout << "Podaj " << i + 1 << ". argument: "; cin >> x[i];
+        cout << "I wartosc funkcji dla " << i + 1 << ". argumentu: "; cin >> y[i];
+    }*/
+
+    cout << "\nStablicowana funkcja:" << endl;
+    for (int i = 0; i < ile_wezlow; i++) cout << x[i] << " " << y[i] << endl; //sprawdzian poprawnosci danych
+    cout << "\n";
+
+    double arg;
+    double wart = 0;
+    cout << "Podaj argument, dla ktorego chcesz znalezc wartosc wielomianu interpolujacego: "; cin >> arg;
+
+    double arg_y = y[0] * 1;
+
+    for (int k = 1; k < ile_wezlow; k++)
+    {
+        arg_y += bk(x, y, k) * pk(x, y, k, arg);
+    }
+    
+    cout << fixed << setprecision(10) << "Wn(x): " << arg_y << endl;
+
+
+    
+    
+    for (int i = 0; i < ile_wezlow; i++)
+    {
+        arg_y = y[0] * 1;
+        arg = x[i];
+        for (int k = 1; k < ile_wezlow; k++)
+        {
+            arg_y += bk(x, y, k) * pk(x, y, k, arg);
+
+
+        }
+        cout << fixed << setprecision(10) << "Wn(x): " << arg_y << endl;
+    }
+    
+
+}
 
 
 int main()
 {
-    int ile_wezlow;
-    cout << "Podaj ilosc wezlow: ";
-    cin >> ile_wezlow;
+    int ile_wezlow = 0;
+    //cout << "Podaj ilosc wezlow: ";
+    //cin >> ile_wezlow;
     zadanie_1(ile_wezlow);
-    
+    zadanie_2(ile_wezlow);
+
     return 0;
 }
