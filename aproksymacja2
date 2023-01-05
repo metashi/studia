@@ -1,0 +1,227 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <algorithm>
+using namespace std;
+const double epsilon = 0.01;
+struct CustomException
+{
+	string Message;
+	CustomException(string message)
+	{
+		Message = message;
+	}
+};
+
+
+double* ZeroArray(int size)
+{
+	double* arrayData = new double[size];
+	for (int i = 0; i < size; i++)
+	{
+		arrayData[i] = 0;
+	}
+	return arrayData;
+}
+
+struct Matrix
+{
+	int Width;
+	int Height;
+	double* Data;
+	Matrix(int width, int height, double* data)
+	{
+		Width = width;
+		Height = height;
+		Data = data;
+	}
+
+	double Get(int x, int y)
+	{
+		return Data[(x * Width) + y];
+	}
+
+	double GetX(int i)
+	{
+		return Data[i];
+	}
+
+	double GetY(int i)
+	{
+		return Data[Width + i];
+	}
+
+	void Set(int x, int y, double value)
+	{
+		Data[(x * Width) + y] = value;
+	}
+
+	void Print()
+	{
+		for (int i = 0; i < Height; i++)
+		{
+			for (int j = 0; j < Width; j++)
+			{
+				cout << Get(i, j) << "     ";
+			}
+			cout << endl;
+		}
+	}
+
+	bool HasDiagonalZero()
+	{
+		for (int i = 0; i < Height; i++)
+		{
+			if (Get(i, i) == 0)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	void CheckDiagonalZero()
+	{
+		if (HasDiagonalZero())
+		{
+			throw CustomException("Matrix has diagonal 0!");
+		}
+	}
+};
+
+//Układ równań rozwiązać metodą Gaussa
+void ReversedGause(Matrix matrix)
+{
+	double* xs = new double[matrix.Height];
+	for (int i = matrix.Height - 1; i >= 0; i--)
+	{
+		double b = matrix.Get(i, matrix.Width - 1);
+		double a = matrix.Get(i, i);
+		double sum = 0;
+		for (int k = matrix.Height - 1; k > i; k--)
+		{
+			sum += matrix.Get(i, k) * xs[k];
+		}
+		double x = (b - sum) / a;
+		xs[i] = x;
+	}
+	//wartości w węzłach
+	cout << "Wartosc w wezlach" << endl;
+	for (int i = 0; i < matrix.Height; i++)
+	{
+		cout << "x" << i << "=" << xs[i] << endl;
+	}
+}
+
+void GaussaEliminationSingleColumn(Matrix matrix, int i)
+{
+	for (int j = i + 1; j < matrix.Height; j++)
+	{
+		double m = matrix.Get(j, i) / matrix.Get(i, i);
+		for (int x = i; x < matrix.Width; x++)
+		{
+			double newData = matrix.Get(j, x) - (matrix.Get(i, x) * m);
+			matrix.Set(j, x, newData);
+		}
+	}
+	matrix.CheckDiagonalZero();
+}
+
+void GaussaElimination(Matrix matrix)
+{
+	for (int i = 0; i < matrix.Width; i++)
+	{
+		GaussaEliminationSingleColumn(matrix, i);
+	}
+	matrix.Print();
+}
+
+void Gausse(Matrix matrix)
+{
+	GaussaElimination(matrix);
+	ReversedGause(matrix);
+}
+
+double fi(double x, int j)
+{
+	return pow(x, j);
+}
+
+double g(int k, int j, Matrix matrix, int m)
+{
+	double result = 0;
+	for (int i = 0; i < matrix.Width; i++)
+	{
+		result += (fi(matrix.GetX(i), k) * fi(matrix.GetX(i), j));
+	}
+	return result;
+}
+
+double F(int k, Matrix matrix, int m)
+{
+	double result = 0;
+	for (int i = 0; i < matrix.Width; i++)
+	{
+		result += (fi(matrix.GetX(i), k) * matrix.GetY(i));
+	}
+	return result;
+}
+
+
+int Zadanie()
+{
+	//Dane wejściowe: podane węzły aproksymacji i wartości w węzłach
+	fstream plik;
+	double wyraz;
+
+	plik.open("dane.txt", ios::in | ios::out);
+
+	int width;
+
+	plik >> width;
+
+	int height = 2;
+
+	double* arrayData = new double[height * width];
+
+	for (int i = 0; i < (height * width); i++)
+	{
+		plik >> wyraz;
+		arrayData[i] = wyraz;
+	}
+	plik.close();
+
+	Matrix dane = Matrix(width, height, arrayData);
+	cout << "Podane wezly aproksymacji i wartosci w wezlach: " << endl;
+	dane.Print();
+
+
+	int potega = 1;
+
+	cout << "Potega: ";
+	cin >> potega;
+	//Macierz rozszerzoną przed obliczeniami (postępowaniem prostym)
+	cout << "Macierz rozszerzona przed obliczeniami: " << endl;
+	int w = (potega + 1) + 1;
+	int h = (potega + 1);
+	Matrix gs = Matrix(w, h, ZeroArray(w * h));
+	for (int i = 0; i < w - 1; i++)
+	{
+		for (int j = 0; j < h; j++)
+		{
+			gs.Set(i, j, g(i, j, dane, potega));
+		}
+	}
+	for (int j = 0; j < h; j++)
+	{
+		gs.Set(j, w - 1, F(j, dane, potega));
+	}
+	gs.Print();
+	cout << "Metoda Gaussa: " << endl; //Współczynniki wielomianu aproksymującego
+	Gausse(gs);
+	return 0;
+}
+
+int main()
+{
+	return Zadanie();
+}
