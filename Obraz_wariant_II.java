@@ -8,15 +8,14 @@ class Obraz {
     private char[][] tab;
     private char[] tab_symb;
     private int[] histogram;
-   // private int[] hist_partial;
-    private int[] parallelHistogram;
-
+    
     public Obraz(int n, int m) {
 	
 	this.size_n = n;
 	this.size_m = m;
 	tab = new char[n][m];
 	tab_symb = new char[94];
+	
 	final Random random = new Random();
 	
 	// for general case where symbols could be not just integers
@@ -35,8 +34,6 @@ class Obraz {
 	System.out.print("\n\n"); 
 	
 	histogram = new int[94];
-	//hist_partial = new int[94];
-	parallelHistogram = new int[94];
    	clear_histogram();
     }
     
@@ -66,48 +63,37 @@ class Obraz {
 	  }
 
     }
- public void calculate_histogram_for_char(int searchedChar)
-    {
-        for(int i=0;i<size_n;i++) {
-            for(int j=0;j<size_m;j++) {
-                if(tab[i][j] == tab_symb[searchedChar]) parallelHistogram[searchedChar]++;
+
+    private class HistogramWorker implements Runnable {
+
+        private int startRow;
+        private int endRow;
+
+        public HistogramWorker(int startRow, int endRow) {
+            this.startRow = startRow;
+            this.endRow = endRow;
+        }
+
+        public void run() {
+            // obliczamy histogram tylko dla znaków w zakresie dla danego wątku
+            for (int i = startRow; i < endRow; i++) {
+                for (int j = 0; j < size_m; j++) {
+                    for (int k = 0; k < 94; k++) {
+                        if (tab[i][j] == tab_symb[k]) {
+                            incrementHistogram(k);
+                        }
+                    }
+                    // wyświetlamy znak i jego ilość wystąpień
+                    synchronized (System.out) {
+                        System.out.print(tab[i][j] + " ");
+                        printHistogram(k);
+                        System.out.println();
+                    }
+                }
             }
         }
-    }
-    public synchronized void print_histogram_for_char(int searchedChar)
-    
-    {
-	synchronized(this) {
-        for(int i=0;i<94;i++) {
-            System.out.print(tab_symb[i]+" "+histogram[i]+" ");
-            for(int j=0; j<histogram[i]; j++) {
-                System.out.print("=");
-            }
-            System.out.print("\n");
-        }
-    }
-       // System.out.print(tab_symb[searchedChar]+" "+histogram[searchedChar]+"\n");
-    }
 
-    public void compare(){
-	boolean isTheSame = true;
-	for(int i=0;i<94;i++) {
-		if(histogram[i] != parallelHistogram[i]) isTheSame = false;
-	}
 
-	if(isTheSame) System.out.println("Histogramy sa takie same");
-	else System.out.println("Histogramy sa rozne");
-    }
-
-       //  private void calculate_partial_histogram(int start_i, int end_i, int start_j, int end_j){
-   // for(int i=start_i; i<end_i; i++) {
-     //   for(int j=start_j; j<end_j; j++) {
-       //     for(int k=0; k<94; k++) {
-         //       if(tab[i][j] == tab_symb[k]) hist_partial[k]++;
-          //  }
-       // }
-    //}
-//}i
 
 // uniwersalny wzorzec dla różnych wariantów zrównoleglenia - można go modyfikować dla
 // różnych wersji dekompozycji albo stosować tak jak jest zapisane poniżej zmieniając tylko
@@ -122,6 +108,22 @@ class Obraz {
 //        for(int k=start_znak;k<end_znak;k+=skok_znak) {
 //           if(tab[i][j] == tab_symb[k]) histogram[k]++;
 //
+
+
+private void incrementHistogram(int index) {
+            synchronized (histogram) {
+                histogram[index]++;
+            }
+        }
+
+        private void printHistogram(int index) {
+            synchronized (System.out) {
+                System.out.print(tab_symb[index] + " ");
+                for (int i = 0; i < histogram[index]; i++) {
+                    System.out.print("=");
+                }
+            }
+        }
 
 
     public void print_histogram(){
